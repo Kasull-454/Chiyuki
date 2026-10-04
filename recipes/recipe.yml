@@ -55,7 +55,7 @@ modules:
       files:
         - https://github.com/terrapkg/subatomic-repos/raw/main/terra.repo
     #    - https://repo.nobaraproject.org/rolling/x86_64/kernel-mainline/nobara-kernel-mainline.repo => continua a dare errore, eppure l'url è corretto (in lavorazione)
-        - https://repo.rakuos.org/rakuos.repo
+#        - https://repo.rakuos.org/rakuos.repo => RIMOSSO (build del 4/10): porta "rum", il gestore di pacchetti di RakuOS, che prende il posto di dnf5 e rompe i passi successivi
         - https://copr.fedorainfracloud.org/coprs/ama1470/kwin-effects-glass/repo/fedora-44/ama1470-kwin-effects-glass-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/atim/starship/repo/fedora-44/atim-starship-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/bieszczaders/kernel-cachyos/repo/fedora-44/bieszczaders-kernel-cachyos-fedora-44.repo
@@ -95,6 +95,9 @@ modules:
       # già presente in Aurora: con allow-erasing dnf rimuove gamemode e installa falcond.
       # Guarda nel log della build cosa viene rimosso.
       allow-erasing: true
+      # precauzione: rum (RakuOS) non deve mai entrare nell'immagine al posto di dnf5
+      exclude:
+        - rum
       install-weak-deps: false
       packages:
     # ─── A ─────────────────────────────────────────
