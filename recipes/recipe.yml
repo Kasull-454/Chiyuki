@@ -439,8 +439,11 @@ modules:
       enabled:
          - podman.socket
          - syncthing.service
-         - konveyor-first-install.service # installa Konveyor al primo login (vedi files/system/usr/bin/konveyor-first-install)
-         - syncthing-monitor-first-install.service # idem per Syncthing Monitor
+    # DISATTIVATE (build del 4/10): "Unit konveyor-first-install.service does not exist": i file non sono nel repo.
+    # Dopo aver copiato i 4 file in files/system/ (manuale sez. 16), riattiva le due righe togliendo
+    # SOLO il "#" iniziale (il "#" sta in colonna 1, così l'indentazione resta giusta):
+#         - konveyor-first-install.service
+#         - syncthing-monitor-first-install.service
     #  masked:
 
 # ─ FINE: initramfs e firma ───────────────────────
