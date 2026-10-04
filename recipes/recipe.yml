@@ -230,9 +230,8 @@ modules:
     #    - yt-dlp
     # ─── Y ─────────────────────────────────────────
     #    - zsh => già presente
-    # ─── ./ ──────────────────────────────────────────
-        - ./plasma-wallpaper-effects-2.1.0-2.1.noarch.rpm
-        - ./proton-pass-1.39.1-1.x86_64.rpm
+    # ─── RPM locali: devono stare in files/dnf/ del repo (si indicano col solo nome file) ───
+        - proton-pass-1.39.1-1.x86_64.rpm
 
   # ───────────────────────────────────────────────
   # ─ CUSTOM KERNEL — Bazzite/CachyOS ─────────────
@@ -289,6 +288,10 @@ modules:
   # all'utente reale. Con -g finisce in /usr/share/plasma/plasmoids/, quindi
   # baked nell'immagine per tutti gli utenti.
   #
+  # plasma-wallpaper-effects: il suo install.sh usa cmake con prefisso $HOME/.local
+  # (in build = /root/.local, inutile). Il CMakeLists non compila nulla: fa solo
+  # plasma_install_package(package ...), quindi qui si installa la stessa
+  # cartella package/ con kpackagetool6 -g, senza dipendenze di build extra.
   # plasmoid-protonvpn richiede il pacchetto "protonvpn" (CLI) installato a
   # parte — non lo installa da solo, si limita ad avvisare se manca.
   # plasmoid-tailscale richiede il binario "tailscale" in $PATH: verifica che
@@ -307,7 +310,9 @@ modules:
             kpackagetool6 -g -t Plasma/Applet -i /tmp/plasmoid-tailscale && \
             git clone --depth=1 https://github.com/thongor77/plasmoid-protonvpn /tmp/plasmoid-protonvpn && \
             kpackagetool6 -g -t Plasma/Applet -i /tmp/plasmoid-protonvpn/package && \
-            rm -rf /tmp/plasma6-widget-desktop /tmp/gamemoder /tmp/plasmoid-tailscale /tmp/plasmoid-protonvpn && \
+            git clone --depth=1 https://github.com/luisbocanegra/plasma-wallpaper-effects /tmp/plasma-wallpaper-effects && \
+            kpackagetool6 -g -t Plasma/Applet -i /tmp/plasma-wallpaper-effects/package && \
+            rm -rf /tmp/plasma6-widget-desktop /tmp/gamemoder /tmp/plasmoid-tailscale /tmp/plasmoid-protonvpn /tmp/plasma-wallpaper-effects && \
             dnf clean all && \
             rm -rf /var/cache/dnf
 
