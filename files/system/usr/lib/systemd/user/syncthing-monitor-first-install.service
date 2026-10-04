@@ -1,0 +1,11 @@
+[Unit]
+Description=Prima installazione di Syncthing Monitor
+ConditionPathExists=!%h/.local/state/syncthing-monitor-installed
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/syncthing-monitor-first-install
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
