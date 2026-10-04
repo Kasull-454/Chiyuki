@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+# Installa Syncthing Monitor al primo login, stessa logica di
+# konveyor-first-install: l'installer di questo widget riavvia Plasma per
+# attivare il permesso "leggere file locali" e va lanciato dall'utente reale.
+set -euo pipefail
+
+MARKER="${HOME}/.local/state/syncthing-monitor-installed"
+
+if [ -f "${MARKER}" ]; then
+    exit 0
+fi
+
+mkdir -p "$(dirname "${MARKER}")"
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "${TMPDIR}"' EXIT
+
+git clone --recurse-submodules --depth=1 https://github.com/DevL0rd/Syncthing-Monitor "${TMPDIR}/Syncthing-Monitor"
+(cd "${TMPDIR}/Syncthing-Monitor" && ./install.sh)
+
+touch "${MARKER}"
