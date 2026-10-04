@@ -1,34 +1,37 @@
+# Mettere in: .github/workflows/build-iso.yml
+# NON TESTATO: generato dalla documentazione dell'Action e da esempi pubblici
+# (Bazzite). Controlla i nomi degli input sulla pagina Marketplace di
+# "Build Container Installer" prima del primo lancio.
 name: Build ISO
 
 on:
-  workflow_dispatch: # Ti permette di avviarlo a mano dalla scheda Actions
+  workflow_dispatch: # si lancia a mano da GitHub > Actions > Build ISO > Run workflow
 
 jobs:
   build-iso:
-    runs-on: ubuntu-latest
+    name: Build ISO
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
-      packages: read
-
     steps:
-      - name: Checkout del repository
-        uses: actions/checkout@v4
+      - name: Build ISO
+        id: build
+        uses: jasonn3/build-container-installer@main
+        with:
+          arch: x86_64
+          image_repo: ghcr.io/kasull-454 # minuscolo, come l'immagine pubblicata dal tuo build
+          image_name: chiyuki
+          image_tag: latest
+          version: 44 # versione di Fedora della base (Aurora su Fedora 44)
+          variant: Kinoite
+          iso_name: chiyuki-latest-44.iso
 
-      - name: Installazione BlueBuild CLI
-        run: |
-          curl -fL https://github.com/blue-build/cli/releases/latest/download/bluebuild-x86_64-unknown-linux-musl.tar.gz | tar -xz
-          sudo mv bluebuild /usr/local/bin/
-
-      - name: Generazione ISO
-        run: |
-          sudo bluebuild generate-iso \
-            --secure-boot-url https://github.com/ublue-os/bazzite/raw/main/secure_boot.der \
-            --enrollment-password universalblue \
-            ./recipes/recipe.yml
-
-      - name: Caricamento ISO negli Artifacts
+      - name: Upload ISO as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ISO-Custom
-          path: "*.iso"
-          retention-days: 3
+          name: ${{ steps.build.outputs.iso_name }}
+          path: |
+            ${{ steps.build.outputs.iso_path }}/${{ steps.build.outputs.iso_name }}
+            ${{ steps.build.outputs.iso_path }}/${{ steps.build.outputs.iso_name }}-CHECKSUM
+          if-no-files-found: error
+          compression-level: 0 # l'ISO è già compressa
