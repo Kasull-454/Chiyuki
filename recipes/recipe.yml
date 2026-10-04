@@ -211,7 +211,7 @@ modules:
     #    - snapper-gui # btrfs snapshot tool - gui - c'è btrfs-assistant
     #    - supergfxctl => non mi serve con una sola GPU
     #    - supergfxctl-plasmoid => ho una sola GPU
-    #    - syncthing
+        - syncthing # fornisce la unit utente syncthing.service abilitata in systemd (build del 4/10: senza il pacchetto la unit non esiste)
         - sysctl
     # ─── T ─────────────────────────────────────────
         - terra-release
