@@ -249,6 +249,12 @@ modules:
   # abilitati da packages-common.yml (che gira prima nell'ordine dei moduli),
   # quindi qui non serve un altro "dnf copr enable".
   #
+  # ATTENZIONE: togliere il kernel stock rimuove anche, come dipendenti, i moduli
+  # kernel costruiti per quel kernel (visto nel build del 4/10): kmod-xone,
+  # xone-kmod-common, kmod-v4l2loopback, v4l2loopback, virtualbox-guest-additions.
+  # Con il kernel CachyOS non tornano da soli: servono versioni per quel kernel.
+  # La spelling giusta del flag dnf5 è --allowerasing (senza trattino).
+  #
   # Piano B (non attivo): se il kernel Bazzite/CachyOS dovesse dare problemi
   # di dipendenze/akmods, il COPR gloriouseggroll/linux-nobara-mainline è già
   # abilitato in packages-common.yml come alternativa — basta cambiare i nomi
@@ -258,7 +264,7 @@ modules:
       - |
         RUN set -euo pipefail && \
             dnf5 -y remove kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra --noautoremove && \
-            dnf5 -y install --allow-erasing kernel-cachyos kernel-cachyos-devel-matched
+            dnf5 -y install --allowerasing kernel-cachyos kernel-cachyos-devel-matched
 
   # ───────────────────────────────────────────────
   # ─ LIBVIRT ─────────────────────────────────────
