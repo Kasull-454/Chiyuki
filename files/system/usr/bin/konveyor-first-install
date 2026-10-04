@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+# Installa Konveyor (tiling scorrevole per KWin) al primo login dell'utente.
+# Non eseguibile a build-time: l'installer di Konveyor compila contro il KWin
+# realmente in esecuzione e va lanciato dall'utente reale, non da root in build.
+set -euo pipefail
+
+MARKER="${HOME}/.local/state/konveyor-installed"
+
+if [ -f "${MARKER}" ]; then
+    exit 0
+fi
+
+mkdir -p "$(dirname "${MARKER}")"
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "${TMPDIR}"' EXIT
+
+git clone --depth=1 https://github.com/DevL0rd/Konveyor "${TMPDIR}/Konveyor"
+(cd "${TMPDIR}/Konveyor" && ./install.sh)
+
+touch "${MARKER}"
