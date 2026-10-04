@@ -230,8 +230,7 @@ modules:
     #    - yt-dlp
     # ─── Y ─────────────────────────────────────────
     #    - zsh => già presente
-    # ─── RPM locali: devono stare in files/dnf/ del repo (si indicano col solo nome file) ───
-        - proton-pass-1.39.1-1.x86_64.rpm
+    # ─── Nessun RPM locale. Proton Pass e Proton VPN: installati a mano dall'utente (Flatpak utente) ───
 
   # ───────────────────────────────────────────────
   # ─ CUSTOM KERNEL — Bazzite/CachyOS ─────────────
@@ -292,8 +291,8 @@ modules:
   # (in build = /root/.local, inutile). Il CMakeLists non compila nulla: fa solo
   # plasma_install_package(package ...), quindi qui si installa la stessa
   # cartella package/ con kpackagetool6 -g, senza dipendenze di build extra.
-  # plasmoid-protonvpn richiede il pacchetto "protonvpn" (CLI) installato a
-  # parte — non lo installa da solo, si limita ad avvisare se manca.
+  # plasmoid-protonvpn RIMOSSO: il suo backend è la CLI "protonvpn" di sistema,
+  # che il Flatpak di Proton VPN non fornisce; inoltre è un "early port" (WIP).
   # plasmoid-tailscale richiede il binario "tailscale" in $PATH: verifica che
   # sia effettivamente installato da qualche parte nel recipe (non risulta nei
   # file che ho — solo tailscaled.service è abilitato in systemd.yml).
@@ -308,11 +307,9 @@ modules:
             kpackagetool6 -g -t Plasma/Applet -i /tmp/gamemoder/package && \
             git clone --depth=1 https://github.com/s-celles/plasmoid-tailscale /tmp/plasmoid-tailscale && \
             kpackagetool6 -g -t Plasma/Applet -i /tmp/plasmoid-tailscale && \
-            git clone --depth=1 https://github.com/thongor77/plasmoid-protonvpn /tmp/plasmoid-protonvpn && \
-            kpackagetool6 -g -t Plasma/Applet -i /tmp/plasmoid-protonvpn/package && \
             git clone --depth=1 https://github.com/luisbocanegra/plasma-wallpaper-effects /tmp/plasma-wallpaper-effects && \
             kpackagetool6 -g -t Plasma/Applet -i /tmp/plasma-wallpaper-effects/package && \
-            rm -rf /tmp/plasma6-widget-desktop /tmp/gamemoder /tmp/plasmoid-tailscale /tmp/plasmoid-protonvpn /tmp/plasma-wallpaper-effects && \
+            rm -rf /tmp/plasma6-widget-desktop /tmp/gamemoder /tmp/plasmoid-tailscale /tmp/plasma-wallpaper-effects && \
             dnf clean all && \
             rm -rf /var/cache/dnf
 
