@@ -40,7 +40,7 @@ modules:
       ID: "chiyuki"
       ID_LIKE: "fedora"
       VERSION_ID: "44/01"
-      VERSION_CODENAME: "Aaroniero" # fase alpha = "minion" (A: Aaroniero, B: Baraggan, ...)
+      VERSION_CODENAME: "Baraggan" # fase alpha = "minion" (A: Aaroniero, B: Baraggan, ...)
     #  LOGO: "fedora-logo-icon"
       DEFAULT_HOSTNAME: "chiyuki"
       HOME_URL: "https://github.com/Kasull-454/Chiyuki"
@@ -64,8 +64,10 @@ modules:
         - https://copr.fedorainfracloud.org/coprs/deltacopy/darkly/repo/fedora-44/deltacopy-darkly-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/errornointernet/klassy/repo/fedora-44/errornointernet-klassy-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/gloriouseggroll/linux-nobara-mainline/repo/fedora-44/gloriouseggroll-linux-nobara-mainline-fedora-44.repo
+        - https://copr.fedorainfracloud.org/coprs/gundulabs/gaze/repo/fedora-44/gundulabs-gaze-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/hazel-bunny/ricing/repo/fedora-44/hazel-bunny-ricing-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/infinality/kwin-effects-better-blur-dx/repo/fedora-44/infinality-kwin-effects-better-blur-dx-fedora-44.repo
+        - https://copr.fedorainfracloud.org/coprs/isac322/krema/repo/fedora-44/isac322-krema-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/joviatrix/winboat/repo/fedora-44/joviatrix-winboat-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/linuxgamerlife/lgl-scxctl-manager/repo/fedora-44/linuxgamerlife-lgl-scxctl-manager-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/lusan/kglance/repo/fedora-44/lusan-kglance-fedora-44.repo
@@ -74,6 +76,8 @@ modules:
         - https://copr.fedorainfracloud.org/coprs/theblackdon/kineticwe/repo/fedora-44/theblackdon-kineticwe-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-44/ublue-os-akmods-fedora-44.repo
         - https://copr.fedorainfracloud.org/coprs/ublue-os/bazzite/repo/fedora-44/ublue-os-bazzite-fedora-44.repo
+        # NextDNS: repo RPM ufficiale (al posto dell'installer "curl | sh", che è interattivo e non adatto al build)
+        - https://repo.nextdns.io/nextdns.repo
     #    - https://copr.fedorainfracloud.org/coprs/ublue-os/staging/repo/fedora-44/ublue-os-staging-fedora-44.repo => già presente in Aurora
     #    - https://copr.fedorainfracloud.org/coprs/ublue-os/packages/repo/fedora-44/ublue-os-packages-fedora-44.repo => già presente in Aurora
     #  copr:
@@ -138,6 +142,8 @@ modules:
         - fwupd
     # ─── G ─────────────────────────────────────────
         - gamescope
+        - gaze # COPR gundulabs/gaze (da verificare per F44)
+        - gaze-gui
         - gcc-c++
         - git
         - git-credential-libsecret
@@ -155,6 +161,7 @@ modules:
         - kdenlive
         - kglance
         - klassy
+        - krema # dock leggero per Plasma 6 (COPR isac322/krema)
 #        - kora-icon-theme => non trovato in nessun repo abilitato (build del 4/10)
     #    - krunner-yafti => dà un problema di dipendenze
     #    - kunifiedpush => già presente
@@ -172,6 +179,8 @@ modules:
     # ─── M ─────────────────────────────────────────
         - material-icons-fonts
         - micro
+    # ─── N ─────────────────────────────────────────
+        - nextdns # client DNS-over-HTTPS di NextDNS (repo repo.nextdns.io); si configura al primo avvio con "chiyuki-nextdns-setup"
     # ─── O ─────────────────────────────────────────
         - okular
         - open-sans-fonts
@@ -321,9 +330,77 @@ modules:
             kpackagetool6 -g -t Plasma/Applet -i /tmp/plasmoid-tailscale && \
             git clone --depth=1 https://github.com/luisbocanegra/plasma-wallpaper-effects /tmp/plasma-wallpaper-effects && \
             kpackagetool6 -g -t Plasma/Applet -i /tmp/plasma-wallpaper-effects/package && \
-            rm -rf /tmp/plasma6-widget-desktop /tmp/gamemoder /tmp/plasmoid-tailscale /tmp/plasma-wallpaper-effects && \
+            git clone --depth=1 https://github.com/oowl/kstats /tmp/kstats && \
+            kpackagetool6 -g -t Plasma/Applet -i /tmp/kstats && \
+            rm -rf /tmp/plasma6-widget-desktop /tmp/gamemoder /tmp/plasmoid-tailscale /tmp/plasma-wallpaper-effects /tmp/kstats && \
             dnf clean all && \
             rm -rf /var/cache/dnf
+
+  # ───────────────────────────────────────────────
+  # ─ KDE-WINDOWS-MODERN (Jeysef) — SOLO DISPONIBILE ─
+  # ───────────────────────────────────────────────
+  # Installa nell'immagine i componenti del tema Windows 11 (github.com/Jeysef/KDE-Windows-Modern,
+  # GPL-3.0) SENZA applicare nulla: niente reset del layout, niente cambio di tema.
+  # Si usano dal desktop: Impostazioni > Aspetto > Tema globale; "Aggiungi pannello" >
+  # Windows Modern Panel; widget "Aggiungi widget".
+  # Non si esegue install.sh: da root usa pkexec, riavvia plasmashell e applica il tema.
+  # Si replicano i suoi percorsi di installazione (scripts/install-lib.sh, UID=0):
+  #   QML puro -> /usr/share/plasma/plasmoids/   | temi -> /usr/share/...
+  #   C++ (systray) -> solo il .so in /usr/lib64/qt6/plugins/plasma/applets/ (come dev.sh)
+  # Incluse anche "themes" (Aurorae, colori, Kvantum, desktoptheme, sfondi) e "icons":
+  # il tema globale le richiama, senza sarebbe incompleto.
+  # Esclusi: sessionlock (scrive nella home), greeter (sostituisce il login manager).
+  # Commit fissato per build ripetibili: per aggiornare cambia WM_COMMIT.
+  #
+  # ICONTASKS (taskbar C++) DISATTIVATO: il fork usa lo STESSO id del Task Manager di serie
+  # (org.kde.plasma.icontasks) e lo script originale cancella il pacchetto stock. Non
+  # sarebbe "disponibile": sostituirebbe la taskbar per tutti i layout. Per attivarlo
+  # togli il "#" alle righe marcate ICONTASKS.
+  - type: containerfile
+    snippets:
+      - |
+        RUN set -euo pipefail && \
+            WM_COMMIT=7ef6bfe99a472f2fc7fa473383eda50f411a8840 && \
+            DEPS="gcc-c++ cmake extra-cmake-modules git qt6-qtbase-devel qt6-qtdeclarative-devel \
+                  kf6-kpackage-devel kf6-kconfig-devel kf6-ki18n-devel kf6-kcoreaddons-devel \
+                  kf6-kwindowsystem-devel kf6-kio-devel kf6-kiconthemes-devel kf6-kitemmodels-devel \
+                  kf6-kservice-devel kf6-kxmlgui-devel kf6-kjobwidgets-devel kf6-kcmutils-devel \
+                  libplasma-devel plasma-workspace-devel plasma-workspace-libs" && \
+            NEW="" && for p in $DEPS; do rpm -q --quiet "$p" || NEW="$NEW $p"; done && \
+            dnf5 -y install $NEW && \
+            git clone https://github.com/Jeysef/KDE-Windows-Modern /tmp/wm && \
+            git -C /tmp/wm checkout "$WM_COMMIT" && \
+            install -d /usr/share/plasma/plasmoids /usr/share/plasma/look-and-feel \
+                       /usr/share/plasma/layout-templates /usr/share/plasma/desktoptheme \
+                       /usr/share/aurorae/themes /usr/share/color-schemes /usr/share/Kvantum \
+                       /usr/share/wallpapers /usr/share/icons && \
+            cp -r /tmp/wm/plasma/applets/org.kde.windowsmodern.showdesktop \
+                  /tmp/wm/plasma/applets/org.kde.windowsmodern.startmenu \
+                  /tmp/wm/plasma/applets/org.kde.windowsmodern.digitalclock \
+                  /usr/share/plasma/plasmoids/ && \
+            cp -r /tmp/wm/plasma/look-and-feel/org.kde.windowsmodern.dark \
+                  /tmp/wm/plasma/look-and-feel/org.kde.windowsmodern.light \
+                  /usr/share/plasma/look-and-feel/ && \
+            cp -r /tmp/wm/plasma/layout-templates/org.kde.windowsmodern.panel /usr/share/plasma/layout-templates/ && \
+            cp -r /tmp/wm/plasma/desktoptheme/* /usr/share/plasma/desktoptheme/ && \
+            cp -r /tmp/wm/aurorae/* /usr/share/aurorae/themes/ && \
+            cp /tmp/wm/color-schemes/*.colors /usr/share/color-schemes/ && \
+            cp -r /tmp/wm/Kvantum/* /usr/share/Kvantum/ && \
+            cp -r /tmp/wm/wallpaper/* /usr/share/wallpapers/ && \
+            cp -r /tmp/wm/icons/windows-modern /usr/share/icons/ && \
+            cmake -S /tmp/wm/plasma/applets/org.kde.windowsmodern.systemtray -B /tmp/wm-systray -DCMAKE_BUILD_TYPE=Release && \
+            cmake --build /tmp/wm-systray --parallel "$(nproc)" && \
+            install -D -m 0755 /tmp/wm-systray/lib/plasma/applets/org.kde.windowsmodern.systemtray.so \
+                  /usr/lib64/qt6/plugins/plasma/applets/org.kde.windowsmodern.systemtray.so && \
+            gtk-update-icon-cache -f /usr/share/icons/windows-modern || true && \
+            rm -rf /tmp/wm /tmp/wm-systray && \
+            { [ -z "$NEW" ] || dnf5 -y remove --noautoremove $NEW; } && \
+            dnf5 -y clean all
+        # ICONTASKS (disattivato, vedi nota sopra). Dipendenze extra non verificate:
+        #   plasma-activities-devel plasma-activities-stats-devel libksysguard-devel kf6-knotifications-devel
+        #   ...build in /tmp/wm/plasma/applets/org.kde.windowsmodern.icontasks, poi:
+        #   install -D -m 0755 .../lib/plasma/applets/org.kde.plasma.icontasks.so /usr/lib64/qt6/plugins/plasma/applets/
+        #   rm -rf /usr/share/plasma/plasmoids/org.kde.plasma.icontasks
 
   # ───────────────────────────────────────────────
   # ─ ADW-TINT-KDE (GTK4 tint) ─────────────────────
@@ -386,6 +463,59 @@ modules:
             rm -rf /var/cache/dnf
 
   # ───────────────────────────────────────────────
+  # ─ NEXTDNS: comando di configurazione ──────────
+  # ───────────────────────────────────────────────
+  # Il binario "nextdns" è già nell'immagine (pacchetto sopra). Manca solo l'ID del profilo,
+  # che è personale e NON va messo in un repo pubblico: lo si inserisce una volta sola
+  # al primo avvio con   sudo chiyuki-nextdns-setup   (chiede l'ID, poi esegue
+  # "nextdns install -profile ID -report-client-info -auto-activate").
+  # Non c'è un nextdns.service abilitato in systemd: senza profilo non avrebbe nulla da fare.
+  - type: script
+    snippets:
+      - |
+        cat > /usr/bin/chiyuki-nextdns-setup <<'EOF'
+        #!/usr/bin/env bash
+        set -euo pipefail
+        if [ "$(id -u)" -ne 0 ]; then
+          echo "Eseguimi con sudo: sudo chiyuki-nextdns-setup [ID_PROFILO]" >&2
+          exit 1
+        fi
+        ID="${1:-}"
+        if [ -z "$ID" ]; then
+          read -rp "ID profilo NextDNS (6 caratteri, da my.nextdns.io): " ID
+        fi
+        nextdns install -profile "$ID" -report-client-info -auto-activate
+        nextdns status
+        EOF
+        chmod 0755 /usr/bin/chiyuki-nextdns-setup
+
+  # ───────────────────────────────────────────────
+  # ─ CORREZIONI POST-ROLLOUT (11/10) ─────────────
+  # ───────────────────────────────────────────────
+  # 1) BAZAAR AL POSTO DI EASYFLATPAK. Aurora installa Bazaar con un file "preinstall" di Flatpak
+  #    (/usr/share/flatpak/preinstall.d/bazaar.preinstall, verificato nel repo ublue-os/aurora):
+  #    a ogni avvio Flatpak lo reinstalla, quindi "remove: io.github.kolunmi.Bazaar" in
+  #    default-flatpaks (che gira una volta sola) non basta. Togliendo il file, Flatpak non lo
+  #    reinstalla più (Aurora stessa avverte che senza quel file Bazaar viene rimosso dai sistemi).
+  # 2) FALCOND-GUI "Failed to add user to group: chown ... File system in sola lettura".
+  #    I profili utente di falcond stanno in /usr/share/falcond/profiles/user (da README di falcond),
+  #    ma /usr è di sola lettura: nessun permesso può renderlo scrivibile. Quella cartella diventa
+  #    un link a /var/lib/falcond/user-profiles (scrivibile; il demone gira come root e la legge
+  #    uguale). tmpfiles.d la crea a ogni avvio con gruppo falcond e permessi 2775; sysusers.d
+  #    crea il gruppo "falcond" in /etc/group (su un sistema già installato i gruppi nuovi
+  #    dell'immagine altrimenti non compaiono).
+  #    NON verificato: il sorgente di falcond-gui non era raggiungibile, quindi non so quali
+  #    comandi esegua esattamente il bottone. Se dà ancora errore, incolla il testo.
+  - type: script
+    snippets:
+      - |
+        rm -f /usr/share/flatpak/preinstall.d/bazaar.preinstall
+        rm -rf /usr/share/falcond/profiles/user
+        ln -s /var/lib/falcond/user-profiles /usr/share/falcond/profiles/user
+        printf 'g falcond -\n' > /usr/lib/sysusers.d/chiyuki-falcond.conf
+        printf 'd /var/lib/falcond/user-profiles 2775 root falcond -\n' > /usr/lib/tmpfiles.d/chiyuki-falcond.conf
+
+  # ───────────────────────────────────────────────
   # ─ PULIZIA CACHE DNF ───────────────────────────
   # ───────────────────────────────────────────────
   - type: script
@@ -442,8 +572,8 @@ modules:
     # DISATTIVATE (build del 4/10): "Unit konveyor-first-install.service does not exist": i file non sono nel repo.
     # Dopo aver copiato i 4 file in files/system/ (manuale sez. 16), riattiva le due righe togliendo
     # SOLO il "#" iniziale (il "#" sta in colonna 1, così l'indentazione resta giusta):
-         - konveyor-first-install.service
-         - syncthing-monitor-first-install.service
+#         - konveyor-first-install.service
+#         - syncthing-monitor-first-install.service
     #  masked:
 
 # ─ FINE: initramfs e firma ───────────────────────
